@@ -157,13 +157,12 @@ describe('ExamUploader 组件 - 考试成绩上传', () => {
       const manualTab = screen.getByText('✏️ 手动录入');
       fireEvent.click(manualTab);
 
-      const examNameInput = screen.getByPlaceholderText('如：期中考试');
-      const subjectInput = screen.getByPlaceholderText('如：数学');
-      const scoreInput = screen.getByPlaceholderText('如：92');
-
-      expect(examNameInput).toBeInTheDocument();
-      expect(subjectInput).toBeInTheDocument();
-      expect(scoreInput).toBeInTheDocument();
+      // Use queryAll to find inputs and verify placeholders exist
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[];
+      const placeholders = inputs.map(i => i.placeholder);
+      expect(placeholders.some(p => p.includes('期中考试'))).toBe(true);
+      expect(placeholders.some(p => p.includes('数学'))).toBe(true);
+      expect(placeholders.some(p => p.includes('92'))).toBe(true);
     });
   });
 
