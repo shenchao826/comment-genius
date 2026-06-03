@@ -38,6 +38,53 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+    <!-- ===== Critical CSS (inline) — paints LCP without waiting for external CSS/JS ===== -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased;background:#fff;color:#111827;line-height:1.5}
+      html{scroll-behavior:smooth}
+
+      /* Fixed Header */
+      .__hdr{position:fixed;top:0;left:0;right:0;height:56px;background:#fff;border-bottom:1px solid #e2e8f0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+      @media(min-width:768px){.__hdr{height:64px;padding:0 24px}}
+      .__hdr-inner{width:100%;max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+      .__brand{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;color:#0f172a}
+      .__tagline{font-size:14px;color:#64748b}
+
+      /* Main container */
+      .__main{padding-top:56px;padding-bottom:32px}
+      @media(min-width:768px){.__main{padding-top:64px}}
+      .__wrap{max-width:960px;margin:0 auto;padding:0 16px}
+      @media(min-width:768px){.__wrap{padding:0 24px}}
+
+      /* Hero Banner — THE LCP ELEMENT (renders before JS) */
+      .__hero{border-radius:12px;padding:24px;margin-bottom:20px;background:#eff6ff;text-align:center;animation:__fi .4s both}
+      @media(min-width:768px){.__hero{padding:32px}}
+      .__hero-icon{font-size:48px;display:block;margin-bottom:8px}
+      .__hero-title{font-size:24px;font-weight:700;color:#1e40af;margin-bottom:8px}
+      .__hero-sub{font-size:14px;color:#64748b}
+
+      /* Form card skeleton */
+      .__card{background:#fff;border-radius:12px;box-shadow:0 4px 6px -1px rgb(0 0 0 / .1),0 2px 4px -2px rgb(0 0 0 / .1);padding:20px 24px;margin-bottom:20px}
+
+      /* Input skeleton */
+      .__input{height:44px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:16px}
+      .__btn{height:44px;background:#2563eb;border-radius:8px;color:#fff;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center}
+
+      /* Two-col layout hint */
+      .__layout{display:flex;gap:32px}
+      .__col-main{flex:1;min-width:0}
+      .__col-side{display:none;width:320px;flex-shrink:0}
+      @media(min-width:1024px){.__layout{flex-direction:row}.__col-side{display:block}}
+
+      /* Animations */
+      @keyframes __fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+      @keyframes __pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+      /* Skeleton loading for form area */
+      .__skel{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:__pulse 1.5s ease-in-out infinite;border-radius:8px}
+    </style>
+
     <!-- Structured Data / JSON-LD -->
     <script type="application/ld+json">
     {
@@ -59,18 +106,52 @@
       }
     }
     </script>
+
+    <!-- Make Vite-injected full CSS load asynchronously (non-render-blocking) -->
+    <script>
+      (function(){function a(){document.querySelectorAll('link[rel="stylesheet"]').forEach(function(s){if(s.href){s.media='print';s.onload=function(){this.media='all'}}})}document.addEventListener('DOMContentLoaded',a)})();
+    </script>
   </head>
   <body>
+    <!-- Static shell: Header + Hero = LCP element, renders WITHOUT waiting for JS/CSS -->
     <div id="root">
-      <style>
-        .app-shell{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;background:linear-gradient(135deg,#1e3a8a,#3b82f6,#0f172a);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:2rem}
-        .app-shell h1{font-size:2rem;font-weight:700;margin-bottom:0.5rem;animation:shell-pulse 1.5s ease-in-out infinite}
-        .app-shell p{font-size:1rem;opacity:0.6}
-        @keyframes shell-pulse{0%,100%{opacity:.6}50%{opacity:1}}
-      </style>
-      <div class="app-shell">
-        <h1>📝 评语助手</h1>
-        <p>AI 驱动的智能教师评语生成器</p>
+      <div class="__app">
+        <header class="__hdr">
+          <div class="__hdr-inner">
+            <div class="__brand"><span>🎓</span><span>评语助手</span></div>
+            <div class="__tagline">AI赋能每一位教师</div>
+          </div>
+        </header>
+        <main class="__main">
+          <div class="__wrap">
+            <div class="__layout">
+              <div class="__col-main">
+                <!-- HERO BANNER — LCP ELEMENT 🎓 (visible immediately) -->
+                <div class="__hero">
+                  <span class="__hero-icon">🎓</span>
+                  <h1 class="__hero-title">AI赋能每一位教师</h1>
+                  <p class="__hero-sub">3秒出有温度的学生评语</p>
+                </div>
+
+                <!-- Card skeleton — shows layout structure while JS loads -->
+                <div class="__card">
+                  <div class="__skel" style="height:44px;margin-bottom:16px"></div>
+                  <div class="__skel" style="height:44px;margin-bottom:20px"></div>
+                  <div class="__skel" style="height:120px;margin-bottom:20px"></div>
+                  <div class="__skel" style="height:44px"></div>
+                </div>
+              </div>
+              <aside class="__col-side">
+                <div class="__card">
+                  <div class="__skel" style="height:20px;margin-bottom:12px"></div>
+                  <div class="__skel" style="height:14px;margin-bottom:8px"></div>
+                  <div class="__skel" style="height:14px;margin-bottom:8px"></div>
+                  <div class="__skel" style="height:14px"></div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

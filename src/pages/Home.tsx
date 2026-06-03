@@ -1,24 +1,26 @@
-import { useState, useEffect, useRef, useCallback, useMemo, type FC } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
 import { Input, Textarea } from '../components/Input';
 import SEO from '../components/SEO';
-import { getErrorMessage, AppException } from '../utils/errorHandling';
+import { getErrorMessage } from '../utils/errorHandling';
 import { api } from '../utils/apiClient';
 import TraitSelector from '../components/TraitSelector';
 import RoleSelector from '../components/RoleSelector';
-import ResultCard from '../components/ResultCard';
-import { colors, radii, shadows, motion, components } from '../config/design-tokens';
+import { colors, radii } from '../config/design-tokens';
 import { favoritesService } from '../services/favorites';
 import { clipboardService } from '../services/clipboard';
 import { historyCache } from '../services/historyCache';
 import { checkAndDecrementQuota } from '../services/quota';
-import ExamUploader from '../components/ExamUploader';
-import ExamAnalyzer from '../components/ExamAnalyzer';
-import ConversationForm from '../components/ConversationForm';
-import HomeVisitForm from '../components/HomeVisitForm';
-import BehaviorQuickLog from '../components/BehaviorQuickLog';
-import FaqSection from '../components/FaqSection';
+
+// Heavy components: lazy-loaded — only needed when user expands panels or generates
+const ResultCard = lazy(() => import('../components/ResultCard'));
+const ExamUploader = lazy(() => import('../components/ExamUploader'));
+const ExamAnalyzer = lazy(() => import('../components/ExamAnalyzer'));
+const ConversationForm = lazy(() => import('../components/ConversationForm'));
+const HomeVisitForm = lazy(() => import('../components/HomeVisitForm'));
+const BehaviorQuickLog = lazy(() => import('../components/BehaviorQuickLog'));
+const FaqSection = lazy(() => import('../components/FaqSection'));
 
 const RAG_API_BASE = import.meta.env.VITE_RAG_API_URL || '';
 
@@ -405,7 +407,7 @@ const Home: FC = () => {
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return;
-      const appErr = AppException.fromError(err);
+      const appErr: any = err;
       console.error('生成评语失败:', appErr.code, appErr.message);
       setError(getErrorMessage(appErr, t('generating_error')));
     } finally {
@@ -486,7 +488,7 @@ const Home: FC = () => {
               <div
                 className="bg-white rounded-xl shadow-md border border-transparent p-5 md:p-6 mb-5 space-y-4"
                 style={{
-                  boxShadow: shadows.md,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
                   borderRadius: radii.xl,
                 }}
               >
@@ -529,20 +531,24 @@ const Home: FC = () => {
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-blue-700">已录入 {examData.length} 条成绩记录</span>
                           </div>
-                          <ExamAnalyzer exams={examData} compact />
+                          <Suspense fallback={<div className="animate-pulse bg-blue-100 rounded h-20" />}>
+                            <ExamAnalyzer exams={examData} compact />
+                          </Suspense>
                         </div>
                       )}
 
                       {/* 上传/管理入口 */}
-                      <ExamUploader
-                        studentId=""
-                        studentName={studentName.trim()}
-                        onSaveComplete={(count) => {
-                          if (count > 0 && studentName.trim()) {
-                            fetchExamData(studentName);
-                          }
-                        }}
-                      />
+                      <Suspense fallback={<div className="animate-pulse bg-blue-100 rounded h-32" />}>
+                        <ExamUploader
+                          studentId=""
+                          studentName={studentName.trim()}
+                          onSaveComplete={(count) => {
+                            if (count > 0 && studentName.trim()) {
+                              fetchExamData(studentName);
+                            }
+                          }}
+                        />
+                      </Suspense>
                     </div>
                   )}
                 </div>
@@ -568,13 +574,15 @@ const Home: FC = () => {
                           已录入 {conversationData.length} 条谈话记录
                         </div>
                       )}
-                      <ConversationForm
-                        studentId=""
-                        studentName={studentName.trim()}
-                        onSaveComplete={() => {
-                          if (studentName.trim()) fetchConversationData(studentName);
-                        }}
-                      />
+                      <Suspense fallback={<div className="animate-pulse bg-teal-100 rounded h-32" />}>
+                        <ConversationForm
+                          studentId=""
+                          studentName={studentName.trim()}
+                          onSaveComplete={() => {
+                            if (studentName.trim()) fetchConversationData(studentName);
+                          }}
+                        />
+                      </Suspense>
                     </div>
                   )}
                 </div>
@@ -600,13 +608,15 @@ const Home: FC = () => {
                           已录入 {homeVisitData.length} 条家访/面谈记录
                         </div>
                       )}
-                      <HomeVisitForm
-                        studentId=""
-                        studentName={studentName.trim()}
-                        onSaveComplete={() => {
-                          if (studentName.trim()) fetchHomeVisitData(studentName);
-                        }}
-                      />
+                      <Suspense fallback={<div className="animate-pulse bg-indigo-100 rounded h-32" />}>
+                        <HomeVisitForm
+                          studentId=""
+                          studentName={studentName.trim()}
+                          onSaveComplete={() => {
+                            if (studentName.trim()) fetchHomeVisitData(studentName);
+                          }}
+                        />
+                      </Suspense>
                     </div>
                   )}
                 </div>
@@ -632,13 +642,15 @@ const Home: FC = () => {
                           已录入 {behaviorData.length} 条行为记录
                         </div>
                       )}
-                      <BehaviorQuickLog
-                        studentId=""
-                        studentName={studentName.trim()}
-                        onSaveComplete={() => {
-                          if (studentName.trim()) fetchBehaviorData(studentName);
-                        }}
-                      />
+                      <Suspense fallback={<div className="animate-pulse bg-purple-100 rounded h-32" />}>
+                        <BehaviorQuickLog
+                          studentId=""
+                          studentName={studentName.trim()}
+                          onSaveComplete={() => {
+                            if (studentName.trim()) fetchBehaviorData(studentName);
+                          }}
+                        />
+                      </Suspense>
                     </div>
                   )}
                 </div>
@@ -649,7 +661,7 @@ const Home: FC = () => {
                   categories={traitCategoriesForSelector}
                   selectedTraits={selectedTraits}
                   onToggle={toggleTrait}
-                  maxSelections={components.tagChip.maxSelections}
+                  maxSelections={6}
                 />
 
                 {/* 补充说明输入 */}
@@ -696,10 +708,7 @@ const Home: FC = () => {
                 {/* 风格选择器 - 三选一横排 */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-slate-700">评语风格</label>
-                  <div
-                    className="grid grid-cols-3 gap-2"
-                    style={{ gap: components.styleSelector.gap }}
-                  >
+                  <div className="grid grid-cols-3 gap-2">
                     {toneStyles.map((tone) => (
                       <button
                         key={tone.id}
@@ -711,7 +720,7 @@ const Home: FC = () => {
                             : 'bg-white border border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50'
                         } ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                         style={{
-                          height: components.styleSelector.itemHeight,
+                          height: '40px',
                         }}
                       >
                         {t(tone.labelKey)}
@@ -780,7 +789,7 @@ const Home: FC = () => {
                   <span
                     className="text-sm font-bold"
                     style={{
-                      color: remainingCount > 1 ? colors.success.DEFAULT : colors.error.DEFAULT,
+                      color: remainingCount > 1 ? '#16a34a' : '#dc2626',
                     }}
                   >
                     {remainingCount}/5
@@ -793,10 +802,10 @@ const Home: FC = () => {
                       width: `${(remainingCount / 5) * 100}%`,
                       background:
                         remainingCount > 3
-                          ? `linear-gradient(to right, ${colors.success.DEFAULT}, ${colors.success.light})`
+                          ? 'linear-gradient(to right, #16a34a, #86efac)'
                           : remainingCount > 1
-                            ? `linear-gradient(to right, ${colors.warning.DEFAULT}, ${colors.warning.light})`
-                            : `linear-gradient(to right, ${colors.error.DEFAULT}, ${colors.error.light})`,
+                            ? 'linear-gradient(to right, #f59e0b, #fcd34d)'
+                            : 'linear-gradient(to right, #dc2626, #fca5a5)',
                     }}
                   />
                 </div>
@@ -814,25 +823,27 @@ const Home: FC = () => {
                   className="mt-5 animate-slide-up"
                   style={{
                     animationDuration: '300ms',
-                    animationTimingFunction: motion.easing.outExpo,
+                    animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                     animationFillMode: 'both',
                   }}
                 >
-                  <ResultCard
-                    content={generatedComment}
-                    isEditing={isEditing}
-                    isFavorited={isFavorited}
-                    wordCount={generatedComment.length}
-                    onCopy={handleCopy}
-                    onEdit={() => setIsEditing(!isEditing)}
-                    onSaveEdit={(newContent) => {
-                      setGeneratedComment(newContent);
-                      setIsEditing(false);
-                    }}
-                    onRegenerate={handleGenerate}
-                    onToggleFavorite={handleToggleFavorite}
-                    onFeedback={handleFeedback}
-                  />
+                  <Suspense fallback={<div className="animate-pulse bg-slate-100 rounded-xl p-6" />}>
+                    <ResultCard
+                      content={generatedComment}
+                      isEditing={isEditing}
+                      isFavorited={isFavorited}
+                      wordCount={generatedComment.length}
+                      onCopy={handleCopy}
+                      onEdit={() => setIsEditing(!isEditing)}
+                      onSaveEdit={(newContent) => {
+                        setGeneratedComment(newContent);
+                        setIsEditing(false);
+                      }}
+                      onRegenerate={handleGenerate}
+                      onToggleFavorite={handleToggleFavorite}
+                      onFeedback={handleFeedback}
+                    />
+                  </Suspense>
                   {chunkCount > 0 && (
                     <div className="mt-3 text-center">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
@@ -970,7 +981,9 @@ const Home: FC = () => {
 
               {/* FAQ 常见问题 */}
               <div className="mt-6">
-                <FaqSection className="text-xs" maxExpanded={1} items={[]} />
+                <Suspense fallback={<div className="animate-pulse bg-slate-100 rounded-xl p-5" />}>
+                  <FaqSection className="text-xs" maxExpanded={1} items={[]} />
+                </Suspense>
               </div>
             </aside>
           </div>
