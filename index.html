@@ -61,6 +61,8 @@
     </script>
   </head>
   <body>
+    <!-- Strip modulepreload for heavy lazy-loaded chunks — saves ~346KB first-paint JS -->
+    <script>(function(){document.querySelectorAll('link[rel="modulepreload"]').forEach(function(l){if(/\/(export|charts)-/.test(l.href))l.remove()})})();</script>
     <div id="root">
       <style>
         .__loader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
