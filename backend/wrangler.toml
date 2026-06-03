@@ -1,0 +1,9 @@
+name = 'teachers-backend'
+main = 'src/index.ts'
+compatibility_date = '2024-01-01'
+compatibility_flags = ['nodejs_compat']
+workers_dev = false
+
+[[routes]]
+pattern = 'teachers.minicode.cloud/api/*'
+zone_name = 'minicode.cloud'

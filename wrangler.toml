@@ -1,0 +1,16 @@
+name = "teachers"
+pages_build_output_dir = "dist"
+
+compatibility_date = '2024-01-01'
+
+# 主应用数据库（users/comments/orders/classes/students/quota）
+[[d1_databases]]
+binding = "DB"
+database_name = "teachers-db"
+database_id = "7ab87227-4e4c-4816-abc9-e556b8c9f4ef"
+
+# RAG 知识库数据库（可选）
+[[d1_databases]]
+binding = "RAG_DB"
+database_name = "rag-knowledge-base"
+database_id = "4e09491d-2c13-40a9-ab8e-265ab94b2ada"

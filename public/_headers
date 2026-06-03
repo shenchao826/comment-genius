@@ -1,0 +1,32 @@
+
+# Cloudflare Pages _headers - 安全头与缓存策略
+
+# API 路由 - 永不缓存（SSE 流式 + RAG 实时查询）
+/api/*
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache
+  X-Accel-Buffering: no
+
+# 全局安全头
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# 静态资源长期缓存（文件名带hash）
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML 文件不缓存（确保始终获取最新版本）
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 图片资源缓存24小时
+/*.png
+  Cache-Control: public, max-age=86400
+/*.webp
+  Cache-Control: public, max-age=86400
+/*.svg
+  Cache-Control: public, max-age=86400
